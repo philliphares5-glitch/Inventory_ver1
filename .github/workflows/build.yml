@@ -58,7 +58,6 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.archive_name }}
-          merge-multiple: true
 
   release:
     needs: build
