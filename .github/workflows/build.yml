@@ -1,8 +1,9 @@
-name: Build Inventory App
+name: Build and Release Inventory App
 
 on:
   push:
-    branches: [ "main", "master" ]
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -35,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller
+          pip install pyinstaller pillow
 
       - name: Build executable with custom icon
         run: |
@@ -52,13 +53,29 @@ jobs:
         run: |
           Compress-Archive -Path dist\inventory_gui.exe -DestinationPath inventory_windows.zip
 
-      - name: Upload compressed archive
+      - name: Upload artifact for release job
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.archive_name }}
+          merge-multiple: true
 
-     - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyinstaller pillow
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all built archives
+        uses: actions/download-artifact@v4
+
+      - name: Display downloaded files
+        run: ls -R
+
+      - name: Create GitHub Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            inventory_linux_archive/inventory_linux.tar.gz
+            inventory_windows_archive/inventory_windows.zip
+          generate_release_notes: true
