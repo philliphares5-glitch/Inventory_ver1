@@ -57,7 +57,8 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.archive_name }}
-- name: Install dependencies
+
+     - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pyinstaller pillow
